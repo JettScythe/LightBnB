@@ -1,4 +1,3 @@
-const properties = require('./json/properties.json');
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -79,19 +78,16 @@ exports.addUser = addUser;
  * @param {string} guest_id The id of the user.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
-const getAllReservations = function(guest_id, limit = 10) {
-  return pool
-    .query(`SELECT * FROM reservations 
+const getAllReservations = async function(guest_id, limit = 10) {
+  try {
+    const reservations = await pool.query(`SELECT * FROM reservations 
     JOIN properties ON reservations.property_id = properties.id
     WHERE guest_id = $1
-    LIMIT $2`, [guest_id, limit])
-    .then((result) => {
-      console.log(result.rows)
-      return result.rows;
-    })
-    .catch((err) => {
-      console.log(err.message);
-    });
+    LIMIT $2`, [guest_id, limit]);
+    return reservations.rows;
+  } catch (err) {
+    console.log(err.message);
+  }
 }
 exports.getAllReservations = getAllReservations;
 
