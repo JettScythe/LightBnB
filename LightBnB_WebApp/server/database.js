@@ -37,19 +37,15 @@ exports.getUserWithEmail = getUserWithEmail;
  * @param {string} id The id of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-const getUserWithId = function(id) {
-  let user;
-  return pool
-    .query(`SELECT * FROM users WHERE id = $1`, [id])
-    .then((result) => {
-      user = result.rows[0];
-      return user;
-    })
-    .catch((err) => {
+const getUserWithId = async function(id) {
+  try {
+    const user = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
+    return user.rows[0];
+  } catch (err) {
       console.log(err.message);
-      user = null;
+      const user = null;
       return user;
-    });
+  }
 }
 exports.getUserWithId = getUserWithId;
 
@@ -61,7 +57,6 @@ exports.getUserWithId = getUserWithId;
 const addUser = async function(user) {
   try {
     const newUser = await pool.query(`INSERT INTO users(NAME, PASSWORD, EMAIL) VALUES ($1, $2, $3) RETURNING *;`, [user.name, user.password, user.email])
-    console.log(newUser.rows[0]);
     return newUser.rows[0];
   } catch (err) {
     console.log(err.message);
