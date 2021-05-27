@@ -15,19 +15,15 @@ const pool = new Pool({
  * @param {String} email The email of the user.
  * @return {Promise<{}>} A promise to the user.
  */
-const getUserWithEmail = function(email) {
-  let user;
-  return pool
-    .query(`SELECT * FROM users WHERE email = $1`, [email])
-    .then((result) => {
-      user = result.rows[0];
-      return user;
-    })
-    .catch((err) => {
-      console.log(err.message);
-      user = null;
-      return user;
-    });
+const getUserWithEmail = async function(email) {
+  try {
+    const user = await pool.query(`SELECT * FROM users WHERE email = $1`, [email]);
+    return user.rows[0];
+  } catch (err) {
+    console.log(err.message);
+    const user = null;
+    return user;
+  }
 };
 
 exports.getUserWithEmail = getUserWithEmail;
@@ -42,11 +38,11 @@ const getUserWithId = async function(id) {
     const user = await pool.query(`SELECT * FROM users WHERE id = $1`, [id]);
     return user.rows[0];
   } catch (err) {
-      console.log(err.message);
-      const user = null;
-      return user;
+    console.log(err.message);
+    const user = null;
+    return user;
   }
-}
+};
 exports.getUserWithId = getUserWithId;
 
 /**
@@ -56,12 +52,12 @@ exports.getUserWithId = getUserWithId;
  */
 const addUser = async function(user) {
   try {
-    const newUser = await pool.query(`INSERT INTO users(NAME, PASSWORD, EMAIL) VALUES ($1, $2, $3) RETURNING *;`, [user.name, user.password, user.email])
+    const newUser = await pool.query(`INSERT INTO users(NAME, PASSWORD, EMAIL) VALUES ($1, $2, $3) RETURNING *;`, [user.name, user.password, user.email]);
     return newUser.rows[0];
   } catch (err) {
     console.log(err.message);
   }
-}
+};
 exports.addUser = addUser;
 
 /// Reservations
@@ -81,7 +77,7 @@ const getAllReservations = async function(guest_id, limit = 10) {
   } catch (err) {
     console.log(err.message);
   }
-}
+};
 exports.getAllReservations = getAllReservations;
 
 /// Properties
@@ -93,7 +89,7 @@ exports.getAllReservations = getAllReservations;
  * @return {Promise<[{}]>}  A promise to the properties.
  */
 
- const getAllProperties = function (options, limit = 10) {
+const getAllProperties = function(options, limit = 10) {
   // 1
   const queryParams = [];
   // 2
@@ -119,7 +115,7 @@ exports.getAllReservations = getAllReservations;
   }
   queryString += `GROUP BY properties.id `;
   if (options.minimum_rating) {
-    queryParams.push(`${options.minimum_rating}`)
+    queryParams.push(`${options.minimum_rating}`);
     queryString += `HAVING AVG(property_reviews.rating) >= $${queryParams.length} `;
   }
 
@@ -149,8 +145,8 @@ const addProperty = function(property) {
     .query(`INSERT INTO properties(
       OWNER_ID, TITLE, DESCRIPTION, THUMBNAIL_PHOTO_URL, COVER_PHOTO_URL,
       COST_PER_NIGHT, STREET, CITY, PROVINCE, POST_CODE, COUNTRY,
-      PARKING_SPACES, NUMBER_OF_BATHROOMS, NUMBER_OF_BEDROOMS) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *;`, 
-      [property.owner_id, property.title, property.description, property.thumbnail_photo_url, property.cover_photo_url,
+      PARKING_SPACES, NUMBER_OF_BATHROOMS, NUMBER_OF_BEDROOMS) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *;`,
+    [property.owner_id, property.title, property.description, property.thumbnail_photo_url, property.cover_photo_url,
       property.cost_per_night, property.street, property.city, property.province, property.post_code,
       property.country, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms])
     .then((result) => {
@@ -160,5 +156,5 @@ const addProperty = function(property) {
     .catch((err) => {
       console.log(err.message);
     });
-}
+};
 exports.addProperty = addProperty;
