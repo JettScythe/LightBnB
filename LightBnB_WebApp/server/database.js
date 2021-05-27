@@ -58,16 +58,14 @@ exports.getUserWithId = getUserWithId;
  * @param {{name: string, password: string, email: string}} user
  * @return {Promise<{}>} A promise to the user.
  */
-const addUser =  function(user) {
-  return pool
-    .query(`INSERT INTO users(NAME, PASSWORD, EMAIL) VALUES ($1, $2, $3) RETURNING *;`, [user.name, user.password, user.email])
-    .then((result) => {
-      user = result.rows[0];
-      return user;
-    })
-    .catch((err) => {
-      console.log(err.message);
-    });
+const addUser = async function(user) {
+  try {
+    const newUser = await pool.query(`INSERT INTO users(NAME, PASSWORD, EMAIL) VALUES ($1, $2, $3) RETURNING *;`, [user.name, user.password, user.email])
+    console.log(newUser.rows[0]);
+    return newUser.rows[0];
+  } catch (err) {
+    console.log(err.message);
+  }
 }
 exports.addUser = addUser;
 
