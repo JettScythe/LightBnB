@@ -7,9 +7,7 @@ const pool = new Pool({
   database: 'lightbnb'
 });
 
-
 /// Users
-
 /**
  * Get a single user from the database given their email.
  * @param {String} email The email of the user.
@@ -61,7 +59,6 @@ const addUser = async function(user) {
 exports.addUser = addUser;
 
 /// Reservations
-
 /**
  * Get all reservations for a single user.
  * @param {string} guest_id The id of the user.
@@ -81,7 +78,6 @@ const getAllReservations = async function(guest_id, limit = 10) {
 exports.getAllReservations = getAllReservations;
 
 /// Properties
-
 /**
  * Get all properties.
  * @param {{}} options An object containing query options.
@@ -140,21 +136,17 @@ exports.getAllProperties = getAllProperties;
  * @param {{}} property An object containing all of the property details.
  * @return {Promise<{}>} A promise to the property.
  */
-const addProperty = function(property) {
-  return pool
-    .query(`INSERT INTO properties(
-      OWNER_ID, TITLE, DESCRIPTION, THUMBNAIL_PHOTO_URL, COVER_PHOTO_URL,
-      COST_PER_NIGHT, STREET, CITY, PROVINCE, POST_CODE, COUNTRY,
-      PARKING_SPACES, NUMBER_OF_BATHROOMS, NUMBER_OF_BEDROOMS) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *;`,
-    [property.owner_id, property.title, property.description, property.thumbnail_photo_url, property.cover_photo_url,
+const addProperty = async function(property) {
+  try {
+    const newProperty = await pool.query(`INSERT INTO properties(OWNER_ID, TITLE, DESCRIPTION, THUMBNAIL_PHOTO_URL, COVER_PHOTO_URL,
+      COST_PER_NIGHT, STREET, CITY, PROVINCE, POST_CODE, COUNTRY, PARKING_SPACES, NUMBER_OF_BATHROOMS, NUMBER_OF_BEDROOMS) 
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *;`,
+      [property.owner_id, property.title, property.description, property.thumbnail_photo_url, property.cover_photo_url,
       property.cost_per_night, property.street, property.city, property.province, property.post_code,
       property.country, property.parking_spaces, property.number_of_bathrooms, property.number_of_bedrooms])
-    .then((result) => {
-      property = result.rows[0];
-      return property;
-    })
-    .catch((err) => {
-      console.log(err.message);
-    });
+    return newProperty.rows[0];
+  } catch (err) {
+    console.log(err.message);
+  }
 };
 exports.addProperty = addProperty;
